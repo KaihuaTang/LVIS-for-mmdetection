@@ -20,7 +20,7 @@ mmdetection
 ├── tools
 ├── configs
 ├── data
-│   ├── coco
+│   ├── LVIS
 │   │   ├── lvis_v0.5_train.json
 │   │   ├── lvis_v0.5_val.json
 │   │   ├── images
@@ -40,4 +40,6 @@ mmdetection
 * Change ```data```, ```dataset_type``` and ```data_root```.
 * Set ```rcnn.score_thr=0.00001``` and ```rcnn.max_per_img=300``` in test_cfg.
 
-## 6. A Weird logger. 
+## 6. A Weird logger.handlers Bug
+
+When I was training the model, I found a weird bug that the logger won't print out anymore. It takes me a long time to figure out that it's caused by the logger.HasHandlers() function, which always returns the True even the  logger.handlers = [], so I change it to len(logger.handlers) > 0. If you don't have this problem, never mind.
