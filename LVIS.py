@@ -292,7 +292,7 @@ class LVISDataset(CustomDataset):
                  logger=None,
                  jsonfile_prefix=None,
                  classwise=False,
-                 proposal_nums=(100, 300, 1000),
+                 proposal_nums=300,
                  iou_thrs=np.arange(0.5, 0.96, 0.05)):
         """Evaluation in COCO protocol.
 
@@ -353,49 +353,17 @@ class LVISDataset(CustomDataset):
                     logger=logger,
                     level=logging.ERROR)
                 break
-
-            if metric == 'segm':
-                # run lvis evaluation
-                print('lvis evaluation')
-                eval_results['lvis'] = {}
-                lvis_eval = LVISEval(self.ann_file_path, result_files[metric], iou_type)
-                lvis_eval.run()
-                print(iou_type)
-                lvis_eval.print_results()
-                keys = lvis_eval.get_results().keys()
-                for k in keys:
-                    eval_results['lvis'][iou_type + k] = lvis_eval.get_results()[k]
-
+            
             iou_type = 'bbox' if metric == 'proposal' else metric
-            cocoEval = COCOeval(cocoGt, cocoDt, iou_type)
-            cocoEval.params.imgIds = self.img_ids
-            if metric == 'proposal':
-                cocoEval.params.useCats = 0
-                cocoEval.params.maxDets = list(proposal_nums)
-                cocoEval.evaluate()
-                cocoEval.accumulate()
-                cocoEval.summarize()
-                metric_items = [
-                    'AR@100', 'AR@300', 'AR@1000', 'AR_s@1000', 'AR_m@1000',
-                    'AR_l@1000'
-                ]
-                for i, item in enumerate(metric_items):
-                    val = float('{:.3f}'.format(cocoEval.stats[i + 6]))
-                    eval_results[item] = val
-            else:
-                cocoEval.evaluate()
-                cocoEval.accumulate()
-                cocoEval.summarize()
-                if classwise:  # Compute per-category AP
-                    pass  # TODO
-                metric_items = [
-                    'mAP', 'mAP_50', 'mAP_75', 'mAP_s', 'mAP_m', 'mAP_l'
-                ]
-                for i in range(len(metric_items)):
-                    key = '{}_{}'.format(metric, metric_items[i])
-                    val = float('{:.3f}'.format(cocoEval.stats[i]))
-                    eval_results[key] = val
-                eval_results['{}_mAP_copypaste'.format(metric)] = (
-                    '{ap[0]:.3f} {ap[1]:.3f} {ap[2]:.3f} {ap[3]:.3f} '
-                    '{ap[4]:.3f} {ap[5]:.3f}').format(ap=cocoEval.stats[:6])
+            # run lvis evaluation
+            eval_results['lvis'] = {}
+            lvis_eval = LVISEval(self.ann_file_path, result_files[metric], iou_type)
+            lvis_eval.params.max_dets = proposal_nums
+            lvis_eval.run()
+            print(iou_type)
+            lvis_eval.print_results()
+            keys = lvis_eval.get_results().keys()
+            for k in keys:
+                eval_results['lvis'][iou_type + k] = lvis_eval.get_results()[k]
+
         return eval_results
