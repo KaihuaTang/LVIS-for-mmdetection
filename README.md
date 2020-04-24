@@ -42,4 +42,4 @@ mmdetection
 
 ## 6. A Weird logger.handlers Bug
 
-When I was training the model, I found a weird bug that the logger won't print out anymore. It takes me a long time to figure out that it's caused by the logger.HasHandlers() function, which always returns the True even the  logger.handlers = []. If you have the same problem, you can use logger.py to replace the original mmdet/utils.logger.py in mmdetection project. If you don't have this problem, never mind. 
+When I was training the model, I found a weird bug that the logger won't print out anymore. It takes me a long time to figure out that it's caused by the logger.HasHandlers() function, which always returns the True even the  logger.handlers = []. If you have the same problem, you can use logger.py to replace the original mmdet/utils/logger.py in mmdetection project. If you don't have this problem, never mind. 
